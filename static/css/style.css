@@ -13,7 +13,8 @@
 }
 
 body {
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   margin: 0;
   background: radial-gradient(circle at top left, #1d283a, #020617 55%, #000 95%);
   color: #e5e7eb;
@@ -43,9 +44,11 @@ body::before {
 }
 
 .game-container {
-  max-width: 1100px;
-  margin: 32px auto;
-  padding: 0 12px 32px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
 }
 
 .game-card {
@@ -66,6 +69,13 @@ body::before {
   gap: 10px;
   margin-top: 16px;
   transition: transform 0.4s ease-out;
+}
+
+.board-wrapper {
+flex-grow: 1;
+display: flex;
+align-items: center;
+justify-content: center;
 }
 
 .board.game-over {
