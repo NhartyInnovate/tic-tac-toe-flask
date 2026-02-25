@@ -47,7 +47,7 @@
 
       <div class="row g-4 mt-2">
         <!-- Left: Controls and info -->
-        <div class="col-md-4">
+        <div class="col-md-4 order-2 order-md-1">
           <div class="panel mb-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h6 class="mb-0">New Game</h6>
@@ -129,8 +129,8 @@
         </div>
 
         <!-- Right: Board -->
-        <div class="col-md-8">
-          <div class="panel">
+        <div class="col-md-8 order-1 order-md-2">
+          <div class="panel" id="board_panel">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <h6 class="mb-0">Board</h6>
             </div>
@@ -245,5 +245,17 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const focusBoard = {{ 'true' if focus_board else 'false' }};
+    if (focusBoard) {
+      const boardPanel = document.getElementById("board-panel");
+      if (boardPanel) {
+        boardPanel.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  });
+</script>
 </body>
 </html>

@@ -100,6 +100,7 @@ def index():
     message = "Choose mode and start a game."
     winner = None
     winning_combo = None  # tuple of indices or None
+    focus_board = False
 
     if request.method == "POST":
         action = request.form.get("action", "start")
@@ -107,6 +108,7 @@ def index():
         # Reset scoreboard
         if action == "reset_scores":
             scores = {"X": 0, "O": 0, "draw": 0}
+            focus_board = False
             session["scores"] = scores
             message = "Scoreboard reset. Start a new game!"
             game_over = True  # nothing on the board
@@ -121,6 +123,7 @@ def index():
             game_over = False
             winner = None
             winning_combo = None
+            focus_board = True
 
             if opponent_type == "computer":
                 message = f"New game: You (X) vs Computer (O) – {difficulty.title()}"
@@ -138,6 +141,7 @@ def index():
             message = ""
             winner = None
             winning_combo = None
+            focus_board = True
 
             if not game_over:
                 # Player's move
@@ -212,6 +216,7 @@ def index():
         scores=scores,
         winner=winner,
         winning_combo=winning_combo,
+        focus_board=focus_board,
     )
 
 
