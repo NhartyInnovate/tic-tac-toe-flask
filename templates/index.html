@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tic-Tac-Toe | Flask + Bootstrap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap 5 CDN -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  >
+    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="game-container">
+    <div class="game-card">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+          <div class="game-heading">Python • Flask • Bootstrap</div>
+          <div class="game-title">Tic-Tac-Toe Arena</div>
+          <p class="subtitle mb-0">
+            Play versus a friend or challenge an AI at different difficulty levels.
+          </p>
+        </div>
+
+        <!-- Scoreboard -->
+        <div class="text-end d-none d-md-block">
+          <div class="small text-secondary mb-1">Scoreboard</div>
+          <div class="scoreboard">
+              X: {{ scores["X"] }} |
+              O: {{ scores["O"] }} |
+              Draws: {{ scores["draw"] }}
+            </div>
+        </div>
+      </div>
+
+      <!-- Mobile scoreboard -->
+      <div class="mt-2 d-md-none mb-2">
+        <div class="small text-secondary mb-1">Scoreboard</div>
+        <div class="badge-mode">
+          <span>X:</span> {{ scores["X"] }} &nbsp;|&nbsp;
+          <span>O:</span> {{ scores["O"] }} &nbsp;|&nbsp;
+          <span>Draws:</span> {{ scores["draw"] }}
+        </div>
+      </div>
+
+      <div class="row g-4 mt-2">
+        <!-- Left: Controls and info -->
+        <div class="col-md-4">
+          <div class="panel mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">New Game</h6>
+              <!-- Reset scores -->
+              <form method="POST" class="ms-2">
+                <input type="hidden" name="action" value="reset_scores">
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                  Reset Scores
+                </button>
+              </form>
+            </div>
+
+            <!-- Start Game Form -->
+            <form method="POST" class="mt-1">
+              <input type="hidden" name="action" value="start">
+
+              <div class="mb-3 mt-1">
+                <label class="form-label">Mode</label>
+                <select class="form-select" name="mode">
+                  <option value="human" {% if opponent_type == "human" %}selected{% endif %}>
+                    Player vs Player
+                  </option>
+                  <option value="computer" {% if opponent_type == "computer" %}selected{% endif %}>
+                    Player vs Computer
+                  </option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Difficulty (vs Computer)</label>
+                <select class="form-select" name="difficulty">
+                  <option value="amateur" {% if difficulty == "amateur" %}selected{% endif %}>Amateur</option>
+                  <option value="intermediate" {% if difficulty == "intermediate" %}selected{% endif %}>Intermediate</option>
+                  <option value="expert" {% if difficulty == "expert" %}selected{% endif %}>Expert</option>
+                </select>
+                <div class="form-text text-secondary mt-1">
+                  Difficulty only affects the computer in Player vs Computer mode.
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-100">
+                Start / Play Again
+              </button>
+            </form>
+          </div>
+
+          <div class="panel">
+            <h6 class="mb-2">Game Status</h6>
+            {% if opponent_type == "computer" %}
+              <span class="badge-mode mb-2">
+                <span class="badge-dot"></span>
+                You (X) vs Computer (O) • {{ difficulty.title() }}
+              </span>
+            {% else %}
+              <span class="badge-mode mb-2">
+                <span class="badge-dot"></span>
+                Player X vs Player O
+              </span>
+            {% endif %}
+
+            <p class="mt-3 mb-2 message-text">{{ message }}</p>
+
+            {% if not game_over %}
+              <p class="text-secondary mb-0">
+                {% if opponent_type == "computer" and current_player == "X" %}
+                  Your turn as <strong>X</strong>. Click a square.
+                {% elif opponent_type == "computer" and current_player == "O" %}
+                  Computer is thinking...
+                {% else %}
+                  Current turn: <strong>{{ current_player }}</strong>
+                {% endif %}
+              </p>
+            {% else %}
+              <p class="text-secondary mb-0">
+                Game over. Use "Start / Play Again" to keep playing with scores.
+              </p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Right: Board -->
+        <div class="col-md-8">
+          <div class="panel">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <h6 class="mb-0">Board</h6>
+            </div>
+
+            <div class="board-wrapper">
+              <!-- Winner banner -->
+              <div class="winner-banner {% if winner %}show{% endif %}">
+                {% if winner == "X" %}
+                  <div class="winner-pill winner-x">
+                    <span class="icon">🏆</span>
+                    <span>Player <strong>X</strong> wins this round!</span>
+                  </div>
+                {% elif winner == "O" and opponent_type == "computer" %}
+                  <div class="winner-pill winner-o">
+                    <span class="icon">🤖</span>
+                    <span>Computer wins this round!</span>
+                  </div>
+                {% elif winner == "O" %}
+                  <div class="winner-pill">
+                    <span class="icon">🏆</span>
+                    <span>Player <strong>O</strong> wins this round!</span>
+                  </div>
+                {% elif winner == "draw" %}
+                  <div class="winner-pill">
+                    <span class="icon">🤝</span>
+                    <span>It’s a draw!</span>
+                  </div>
+                {% endif %}
+              </div>
+
+              <form method="POST">
+                <input type="hidden" name="action" value="move">
+                <input type="hidden" name="board" value="{{ board_str }}">
+                <input type="hidden" name="current_player" value="{{ current_player }}">
+                <input type="hidden" name="opponent_type" value="{{ opponent_type }}">
+                <input type="hidden" name="difficulty" value="{{ difficulty }}">
+                <input type="hidden" name="game_over" value="{{ 'true' if game_over else 'false' }}">
+
+                <div class="board {% if game_over %}game-over{% endif %}">
+                  {% for i in range(9) %}
+                    {% set cell = board[i] %}
+                    {% set is_winning = winning_combo and (i in winning_combo) %}
+
+                    {% if cell == " " and not game_over %}
+                      <button
+                        type="submit"
+                        name="move"
+                        value="{{ i }}"
+                        class="btn cell-btn cell-empty js-move-btn"
+                      >
+                        &nbsp;
+                      </button>
+                    {% else %}
+                      <button
+                        type="button"
+                        class="btn cell-btn cell-filled
+                               {% if cell == 'X' %}mark-x{% elif cell == 'O' %}mark-o{% endif %}
+                               {% if is_winning %}cell-winning{% endif %}"
+                        disabled
+                      >
+                        {{ cell if cell != " " else "" }}
+                      </button>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="footer-text">
+        Built with Python, Flask &amp; Bootstrap · Animated UI, difficulty levels, and persistent scoreboard.
+      </p>
+    </div>
+  </div>
+
+  <!-- JS Beep using Web Audio API -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      let audioCtx = null;
+
+      function playBeep() {
+        try {
+          if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          }
+          const duration = 0.09;
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = "square";
+          osc.frequency.value = 660;
+          gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start();
+          osc.stop(audioCtx.currentTime + duration);
+        } catch (e) {
+          // fail silently if audio not allowed
+        }
+      }
+
+      // Attach click sound to playable cells
+      document.querySelectorAll(".js-move-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          playBeep();
+        });
+      });
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
