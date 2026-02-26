@@ -246,3 +246,28 @@ body::before {
     0 0 18px rgba(249,115,22,0.8),
     0 0 35px rgba(249,115,22,0.4);
 }
+
+/* Desktop: make card more compact so it fits better in one screen */
+@media (min-width: 992px) {
+  .game-container {
+    margin: 12px auto;
+    padding: 0 12px 12px;
+  }
+
+  .game-card {
+    padding: 16px 16px 18px;
+    border-radius: 20px;
+  }
+
+  .panel {
+    padding: 12px 12px 14px;
+  }
+
+  .subtitle {
+    margin-bottom: 2px;
+  }
+
+  .footer-text {
+    margin-top: 6px;
+  }
+}
